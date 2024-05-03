@@ -12,11 +12,42 @@ import {
   useFonts,
   CinzelDecorative_400Regular,
 } from "@expo-google-fonts/cinzel-decorative";
+import { EBGaramond_400Regular } from "@expo-google-fonts/eb-garamond";
 
 export default function Cadastro({ navigation }) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+
+  const handleCadastro = () => {
+    const request = {
+      name: name,
+      email: email,
+      password: password,
+      role: false,
+    };
+
+    fetch("http://capacitacao.byronsolutions.com:4000/users", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(request),
+    })
+      .then((response) => {
+        if (response.ok) {
+          navigation.navigate("PaginaInicial");
+        } else {
+          alert("Erro ao criar o cadastro. Por favor, tente novamente.");
+        }
+      })
+      .catch((error) => {
+        console.error("Ocorreu um erro:", error);
+        alert(
+          "Ocorreu um erro o tentar criar o cadastro. Por favor, tente novamente."
+        );
+      });
+  };
 
   return (
     <View style={styles.container}>
@@ -25,25 +56,25 @@ export default function Cadastro({ navigation }) {
         style={styles.image}
       />
       <TextInput
-        style={styles.input}
-        placeholder="Nome"
+        style={[styles.input, { fontFamily: "EBGaramond_400Regular" }]}
+        placeholder="NOME"
         value={name}
         onChangeText={(text) => setName(text)}
       />
 
       <TextInput
-        style={styles.input}
-        placeholder="Email"
+        style={[styles.input, { fontFamily: "EBGaramond_400Regular" }]}
+        placeholder="EMAIL"
         value={email}
         onChangeText={(text) => setEmail(text)}
       />
       <TextInput
-        style={styles.input}
-        placeholder="Senha"
+        style={[styles.input, { fontFamily: "EBGaramond_400Regular" }]}
+        placeholder="SENHA"
         value={password}
         onChangeText={(text) => setPassword(text)}
       />
-      <TouchableOpacity>
+      <TouchableOpacity onPress={handleCadastro}>
         <View style={styles.button}>
           <Text style={styles.textoBotao}>Cadastrar</Text>
         </View>
@@ -67,7 +98,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     marginTop: 20,
     paddingLeft: 10,
-    color: "white",
+    color: "black",
     backgroundColor: "white",
     marginBottom: 10,
     fontFamily: "CinzelDecorativeRegular",

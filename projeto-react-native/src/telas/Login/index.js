@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+
 import {
   StyleSheet,
   View,
@@ -12,10 +13,53 @@ import {
   useFonts,
   CinzelDecorative_400Regular,
 } from "@expo-google-fonts/cinzel-decorative";
+import { EBGaramond_400Regular } from "@expo-google-fonts/eb-garamond";
 
 export default function Login({ navigation }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const handleLogin = () => {
+    setLoading(true);
+    const request = {
+      email: email,
+      password: password,
+    };
+
+    fetch("http://capacitacao.byronsolutions.com:4000/users/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(request),
+    })
+      .then((response) => {
+        if (response.ok) {
+          return response.json();
+        } else {
+          throw new Error("Credenciais inválidas. Por favor, tente novamente");
+        }
+      })
+      .then((data) => {
+        setLoading(false);
+        if (data && data.token) {
+          navigation.navigate("PaginaInicial", {
+            token: data.token,
+            userId: data.profileId,
+          });
+          console.log("Id do usuário", data.data.id);
+          console.log("Token do user", data.token);
+        } else {
+          throw new Error("Dados do token ausentes");
+        }
+      })
+      .catch((error) => {
+        alert(
+          "Ocorreu um erro ao tentar fazer login. Por favor, tente novamente"
+        );
+      });
+  };
 
   return (
     <View style={styles.container}>
@@ -25,18 +69,20 @@ export default function Login({ navigation }) {
       />
 
       <TextInput
-        style={styles.input}
-        placeholder="Email"
+        style={[styles.input, { fontFamily: "EBGaramond_400Regular" }]}
+        placeholder="EMAIL"
         value={email}
         onChangeText={(text) => setEmail(text)}
       />
       <TextInput
-        style={styles.input}
-        placeholder="Senha"
+        style={[styles.input, { fontFamily: "EBGaramond_400Regular" }]}
+        placeholder="SENHA"
         value={password}
         onChangeText={(text) => setPassword(text)}
+        secureTextEntry={true}
       />
-      <TouchableOpacity style={styles.button}>
+
+      <TouchableOpacity onPress={handleLogin} style={styles.button}>
         <Text style={styles.textoBotao}>Entrar</Text>
       </TouchableOpacity>
 
@@ -79,7 +125,7 @@ const styles = StyleSheet.create({
     borderColor: "white",
     marginTop: 20,
     paddingLeft: 10,
-    color: "white",
+    color: "black",
     backgroundColor: "white",
     marginBottom: 10,
     fontFamily: "CinzelDecorativeRegular",
