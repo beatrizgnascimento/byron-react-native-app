@@ -1,27 +1,63 @@
-import React from "react";
-import { StyleSheet, View, Image, TouchableOpacity } from "react-native";
+import React, { useEffect, useState } from "react";
+import { StyleSheet, View, Image, TouchableOpacity, Text } from "react-native";
 import { useFonts } from "expo-font";
 import { CinzelDecorative_400Regular } from "@expo-google-fonts/cinzel-decorative";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { EBGaramond_400Regular } from "@expo-google-fonts/eb-garamond";
 import { useNavigation } from "@react-navigation/native";
 import PaginaInicial from "../PaginaInicial";
+import axios from "axios";
 
 const Tab = createBottomTabNavigator();
 
 const TabRoutes = () => {
   return (
-    <View style={styles.header}>
-      <View style={styles.headerImage}>
-        <Image
-          source={require("./../../imagens/logoHeader.png")}
-          style={styles.image}
-        />
+    <View style={styles.container}>
+      <View style={styles.header}>
+        <View style={styles.headerImage}>
+          <Image
+            source={require("./../../imagens/logoHeader.png")}
+            style={styles.image}
+          />
+        </View>
+      </View>
+      <View>
+        <Text>Seu carrinho de compras está vazio</Text>
       </View>
     </View>
   );
 };
-export default function Carrinho({ navigation }) {
+
+export default function Carrinho({ route, navigation }) {
+  const [cart, setCart] = useState([]);
+  const [total, setTotal] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchCart = async () => {
+      try {
+        const token = route.params.token;
+        const userId = route.params.userId;
+        const response = await axios.get(
+          "http://capacitacao.byronsolutions.com:4000/cart",
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        setCart(response.data.products);
+        setTotal(response.data.total);
+        setIsLoading(false);
+      } catch (error) {
+        console.log("Erro ao buscar carrinho:", error);
+        setIsLoading(false);
+      }
+    };
+    fetchCart();
+  }, []);
+
   return (
     <Tab.Navigator
       screenOptions={{

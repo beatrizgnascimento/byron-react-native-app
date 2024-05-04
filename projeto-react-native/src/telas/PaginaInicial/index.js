@@ -17,6 +17,7 @@ import Carrinho from "../Carrinho";
 import { EBGaramond_400Regular } from "@expo-google-fonts/eb-garamond";
 import { useNavigation } from "@react-navigation/native";
 import Carousel from "react-native-snap-carousel";
+import axios from "axios";
 
 const Tab = createBottomTabNavigator();
 
@@ -36,7 +37,11 @@ const TabRoutes = ({ products, addProductToCart }) => {
         <Text style={styles.productPrice}>R$ {item.price}</Text>
         <TouchableOpacity
           style={styles.btnBuy}
-          onPress={() => addProductToCart(item)}
+          onPress={() => {
+            addProductToCart(item.id);
+            console.log("Nome:", item.nome);
+            console.log("ID:", item.id);
+          }}
         >
           <Text style={styles.textBtn}>Comprar</Text>
         </TouchableOpacity>
@@ -126,7 +131,8 @@ const TabRoutes = ({ products, addProductToCart }) => {
 export default function PaginaInicial({ navigation, route }) {
   const [products, setProducts] = useState([]);
   console.log(products);
-  const { token, userId } = route.params || {};
+  const { userId, token } = route.params || {};
+  console.log("Route params:", route.params);
   const [isPressing, setIsPressing] = useState(false);
 
   useEffect(() => {
@@ -137,31 +143,44 @@ export default function PaginaInicial({ navigation, route }) {
   }, []);
 
   const addProductToCart = async (product) => {
+    const request = {
+      userId: userId,
+      token: token,
+    };
+    console.log("USER ID", userId);
+    console.log("TOKEN", token);
     try {
-      const response = await fetch(
+      console.log("UserId:", userId);
+      console.log("Token: ", token);
+      const response = await axios.post(
         "http://capacitacao.byronsolutions.com:4000/cart/add",
+        userId,
+        product,
+
         {
-          method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
+            authorization: `Bearer ${token}`,
           },
-          body: JSON.stringify({
-            product: product,
-          }),
         }
       );
-      const responseData = await response.json();
-      console.log("Id do user", userId);
-      if (response.ok) {
-        console.log("deu certo", responseData);
+      console.log(response);
+      const { data } = response;
+      console.log(response);
+      if (data && data.token) {
+        console.log("Produto adicionado ao carrinho:", response.data),
+          {
+            product: product.id,
+            userId: data.data.id,
+          };
       } else {
-        console.log("erro", responseData);
+        throw new Error("Dados do token ausentes");
       }
     } catch (error) {
-      console.log(error);
+      console.log("Erro ao adicionar produto ao carrinho:", error);
     }
   };
+
   return (
     <Tab.Navigator
       screenOptions={{

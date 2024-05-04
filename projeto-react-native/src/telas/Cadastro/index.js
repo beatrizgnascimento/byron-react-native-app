@@ -36,7 +36,12 @@ export default function Cadastro({ navigation }) {
     })
       .then((response) => {
         if (response.ok) {
-          navigation.navigate("PaginaInicial");
+          response.json().then((data) => {
+            navigation.navigate("PaginaInicial", {
+              token: data.token,
+              userId: data.data.id,
+            });
+          });
         } else {
           alert("Erro ao criar o cadastro. Por favor, tente novamente.");
         }
