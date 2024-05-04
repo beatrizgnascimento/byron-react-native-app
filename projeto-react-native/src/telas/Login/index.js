@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import axios from "axios";
 
 import {
   StyleSheet,
@@ -20,45 +21,36 @@ export default function Login({ navigation }) {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     setLoading(true);
     const request = {
       email: email,
       password: password,
     };
 
-    fetch("http://capacitacao.byronsolutions.com:4000/users/login", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(request),
-    })
-      .then((response) => {
-        if (response.ok) {
-          return response.json();
-        } else {
-          throw new Error("Credenciais inválidas. Por favor, tente novamente");
-        }
-      })
-      .then((data) => {
-        setLoading(false);
-        if (data && data.token) {
-          navigation.navigate("PaginaInicial", {
-            token: data.token,
-            userId: data.profileId,
-          });
-          console.log("Id do usuário", data.data.id);
-          console.log("Token do user", data.token);
-        } else {
-          throw new Error("Dados do token ausentes");
-        }
-      })
-      .catch((error) => {
-        alert(
-          "Ocorreu um erro ao tentar fazer login. Por favor, tente novamente"
-        );
-      });
+    try {
+      const response = await axios.post(
+        "http://capacitacao.byronsolutions.com:4000/users/login",
+        request
+      );
+      const { data } = response;
+      setLoading(false);
+      if (data && data.token) {
+        navigation.navigate("PaginaInicial", {
+          token: data.token,
+          userId: data.data.id,
+        });
+        console.log("Id do usuário", data.data.id);
+        console.log("Token do user", data.token);
+      } else {
+        throw new Error("Dados do token ausentes");
+      }
+    } catch (error) {
+      setLoading(false);
+      alert(
+        "Ocorreu um erro ao tentar fazer login. Por favor, tente novamente"
+      );
+    }
   };
 
   return (
