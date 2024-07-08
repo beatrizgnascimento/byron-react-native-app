@@ -1,0 +1,7 @@
+{
+  "dependencies": {
+    "babel-plugin-module-resolver": "^5.0.2",
+    "expo": "^50.0.17",
+    "react-native": "^0.73.6"
+  }
+}
